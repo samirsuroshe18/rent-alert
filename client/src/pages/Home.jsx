@@ -20,6 +20,7 @@ const Home = () => {
   const [notification, setNotification] = useState({ show: false, type: '', message: '' });
   const [formData, setFormData] = useState({ name: '', address: '', mobile: '' });
   const { users, setUsers } = useTenantListData();
+  // const [users, setUsers] = useState(useTenantListData());
   const [deletingIds, setDeletingIds] = useState(new Set());
   const [alertingIds, setAlertingIds] = useState(new Set());
   const navigate = useNavigate();

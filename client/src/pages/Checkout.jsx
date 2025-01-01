@@ -1,27 +1,19 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { 
-  Package2, 
-  CreditCard, 
-  Wallet, 
-  QrCode , 
-  Building ,
-  Lock,
-  Package,
-  Receipt,
-  ShieldCheck,
-  Shield,
-  Truck
-} from 'lucide-react';
+import { Package2 } from 'lucide-react';
 
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
 
 function Checkout() {
+  const [isTermsAccepted, setIsTermsAccepted] = useState(false);
+
+  const handleCheckboxChange = (e) => {
+    setIsTermsAccepted(e.target.checked);
+  };
+
   return (
     <div className="flex flex-col min-h-screen">
       <header className="bg-gray-900 text-white py-4 px-6">
@@ -30,17 +22,11 @@ function Checkout() {
             <Package2 className="h-6 w-6" />
             <span className="text-lg font-semibold">Smartdwell Technologies</span>
           </Link>
-          {/* <nav className="hidden md:flex items-center gap-4">
-            <Link to="/" className="hover:underline">Home</Link>
-            <Link to="/products" className="hover:underline">Products</Link>
-            <Link to="/about" className="hover:underline">About</Link>
-            <Link to="/contact" className="hover:underline">Contact</Link>
-          </nav> */}
         </div>
       </header>
-      <main className="flex-1 container mx-auto grid grid-cols-1 md:grid-cols-3 gap-8 py-12 px-6">
-        <div className="col-span-2">
-          <h1 className="text-3xl font-bold mb-6">Checkout</h1>
+      <main className="flex-1 flex justify-center items-center py-12 px-6">
+        <div className="w-full max-w-2xl">
+          <h1 className="text-3xl font-bold mb-6 text-center">Checkout</h1>
           <div className="bg-white rounded-lg shadow-md p-8">
             <form className="grid grid-cols-2 gap-6">
               <div className="col-span-2">
@@ -64,102 +50,31 @@ function Checkout() {
                 <Input id="state" placeholder="CA" />
               </div>
               <div>
-                <Label htmlFor="zip">Zip</Label>
-                <Input id="zip" placeholder="12345" />
+                <Label htmlFor="pin">Pincode</Label>
+                <Input id="pin" placeholder="400001" />
+              </div>
+              <div>
+                <Label htmlFor="amount">Amount</Label>
+                <Input type="number" id="amount" placeholder="₹" />
+              </div>
+              <div className="col-span-2 flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  id="terms"
+                  className="h-4 w-4"
+                  checked={isTermsAccepted}
+                  onChange={handleCheckboxChange}
+                />
+                <Label htmlFor="terms" className="text-sm">
+                  I agree to the <Link to="/terms" className="text-blue-500 underline">terms and conditions</Link>
+                </Label>
               </div>
               <div className="col-span-2">
-                <Label htmlFor="payment">Payment Method</Label>
-                <RadioGroup id="payment" defaultValue="credit-card">
-                  <div className="flex items-center gap-4">
-                    <RadioGroupItem id="credit-card" value="credit-card" />
-                    <Label htmlFor="credit-card" className="flex items-center">
-                      <CreditCard className="h-6 w-6 mr-2" />
-                      Credit Card
-                    </Label>
-                  </div>
-                  <div className="flex items-center gap-4">
-                    <RadioGroupItem id="paypal" value="paypal" />
-                    <Label htmlFor="paypal" className="flex items-center">
-                      <Wallet className="h-6 w-6 mr-2" />
-                      PayPal
-                    </Label>
-                  </div>
-                  <div className="flex items-center gap-4">
-                    <RadioGroupItem id="apple-pay" value="apple-pay" />
-                    <Label htmlFor="apple-pay" className="flex items-center">
-                      <Building className="h-6 w-6 mr-2" />
-                      Net Banking
-                    </Label>
-                  </div>
-                  <div className="flex items-center gap-4">
-                    <RadioGroupItem id="google-pay" value="google-pay" />
-                    <Label htmlFor="google-pay" className="flex items-center">
-                      <QrCode className="h-6 w-6 mr-2" />
-                      Google Pay
-                    </Label>
-                  </div>
-                </RadioGroup>
-              </div>
-              <div className="col-span-2">
-                <Button type="submit" className="w-full">
+                <Button type="submit" className="w-full" disabled={!isTermsAccepted}>
                   Place Order
                 </Button>
               </div>
             </form>
-          </div>
-        </div>
-        <div className="bg-white rounded-lg shadow-md p-8">
-          <h2 className="text-2xl font-bold mb-6">Order Summary</h2>
-          <div className="space-y-4">
-            <div className="flex justify-between">
-              <span>Subtotal</span>
-              <span>$99.99</span>
-            </div>
-            <div className="flex justify-between">
-              <span>Shipping</span>
-              <span>$5.99</span>
-            </div>
-            <div className="flex justify-between">
-              <span>Discount</span>
-              <span className="text-green-500">-$10.00</span>
-            </div>
-            <Separator />
-            <div className="flex justify-between font-bold">
-              <span>Total</span>
-              <span>$95.98</span>
-            </div>
-            <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <Package className="h-5 w-5 text-gray-500" />
-                <span>1 x Acme Widget</span>
-                <span className="ml-auto">$99.99</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Package className="h-5 w-5 text-gray-500" />
-                <span>1 x Acme Gadget</span>
-                <span className="ml-auto">$99.99</span>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <Truck className="h-5 w-5 text-gray-500" />
-              <span>Estimated delivery: 3-5 business days</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <ShieldCheck className="h-5 w-5 text-gray-500" />
-              <span>Secure checkout with SSL encryption</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Receipt className="h-5 w-5 text-gray-500" />
-              <span>30-day return policy</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Lock className="h-5 w-5 text-gray-500" />
-              <span>Your payment information is securely stored and encrypted</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Shield className="h-5 w-5 text-gray-500" />
-              <span>Fraud protection and buyer protection included</span>
-            </div>
           </div>
         </div>
       </main>

@@ -14,11 +14,12 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 // routes import
-import tenantRouter from './routes/tenant.routes.js';
-
+import tenantRouter from './routes/tenant.route.js';
+import phonepeRouter from './routes/phonepe.route.js';
 
 //Routes declaration
 app.use("/api/v1/tenant", tenantRouter);
+app.use("/api/v1/phonepe", phonepeRouter);
 
 // Custom error handeling
 app.use((err, req, res, next) => {
