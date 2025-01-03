@@ -7,6 +7,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2 } from "lucide-react";
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { loginUser } from '@/api/authApi';
 
 const Login = () => {
   const [loading, setLoading] = useState(false);
@@ -20,16 +21,7 @@ const Login = () => {
     setError('');
 
     try {
-
-      const response = await axios.post(
-        `${import.meta.env.VITE_DOMAIN}/api/v1/tenant/login`,
-        {
-          email: formData.email,
-          password: formData.password,
-        },
-        { withCredentials: true }
-      );
-      // Handle successful login - e.g., redirect to dashboard
+      const response = await loginUser(formData);
       navigate('/');
     } catch (error) {
       setError(error.message);
@@ -79,7 +71,7 @@ const Login = () => {
               </Alert>
             )}
 
-            <Button
+            <Button 
               type="submit"
               className="w-full"
               disabled={loading}

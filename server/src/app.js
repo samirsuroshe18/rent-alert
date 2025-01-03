@@ -16,10 +16,12 @@ app.use(cookieParser());
 // routes import
 import tenantRouter from './routes/tenant.route.js';
 import phonepeRouter from './routes/phonepe.route.js';
+import checkoutRouter from './routes/checkout.route.js';
 
 //Routes declaration
 app.use("/api/v1/tenant", tenantRouter);
 app.use("/api/v1/phonepe", phonepeRouter);
+app.use("/api/v1/checkout", checkoutRouter);
 
 // Custom error handeling
 app.use((err, req, res, next) => {

@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { Loader2, LogOut } from "lucide-react";
+import { logoutUser } from "@/api/authApi";
 
 export default function Component() {
   const [isLoading, setIsLoading] = useState(false);
@@ -12,20 +14,14 @@ export default function Component() {
   const handleLogout = async () => {
     setIsLoading(true);
     try {
-      await axios.get(
-        `${import.meta.env.VITE_DOMAIN}/api/v1/tenant/logout`,
-        {
-            withCredentials: true
-        }
-      ); // Adjust the API endpoint as necessary
-      navigate('/login');
-      // Perform additional actions such as redirecting the user
+      await logoutUser();
+      navigate("/login");
     } catch (error) {
       alert("Failed to log out. Please try again.");
     } finally {
       setIsLoading(false);
     }
-  };
+  }
 
   return (
     <header className="flex h-20 w-full shrink-0 items-center px-4 md:px-6">
@@ -42,18 +38,51 @@ export default function Component() {
             <span className="sr-only">Acme Inc</span>
           </Link>
           <div className="grid gap-2 py-6">
-            <Link href="#" className="flex w-full items-center py-2 text-lg font-semibold" prefetch={false}>
+            <Link
+              href="#"
+              className="flex w-full items-center py-2 text-lg font-semibold"
+              prefetch={false}
+            >
               Home
             </Link>
-            <Link href="#" className="flex w-full items-center py-2 text-lg font-semibold" prefetch={false}>
+            <Link
+              href="#"
+              className="flex w-full items-center py-2 text-lg font-semibold"
+              prefetch={false}
+            >
               About
             </Link>
-            <Link href="#" className="flex w-full items-center py-2 text-lg font-semibold" prefetch={false}>
+            <Link
+              href="#"
+              className="flex w-full items-center py-2 text-lg font-semibold"
+              prefetch={false}
+            >
               Services
             </Link>
-            <Link href="#" className="flex w-full items-center py-2 text-lg font-semibold" prefetch={false}>
+            <Link
+              href="#"
+              className="flex w-full items-center py-2 text-lg font-semibold"
+              prefetch={false}
+            >
               Contact
             </Link>
+            <Button
+              onClick={handleLogout}
+              disabled={isLoading}
+              className="group inline-flex h-9 w-max items-center justify-center rounded-md bg-red-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-600 focus:bg-red-600 focus:outline-none"
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Logging out...
+                </>
+              ) : (
+                <>
+                  <LogOut className="w-4 h-4 mr-2" />
+                  Logout
+                </>
+              )}
+            </Button>
           </div>
         </SheetContent>
       </Sheet>
@@ -95,7 +124,17 @@ export default function Component() {
           disabled={isLoading}
           className="group inline-flex h-9 w-max items-center justify-center rounded-md bg-red-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-600 focus:bg-red-600 focus:outline-none"
         >
-          {isLoading ? "Logging out..." : "Logout"}
+          {isLoading ? (
+            <>
+              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              Logging out...
+            </>
+          ) : (
+            <>
+              <LogOut className="w-4 h-4 mr-2" />
+              Logout
+            </>
+          )}
         </Button>
       </nav>
     </header>

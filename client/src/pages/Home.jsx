@@ -9,6 +9,8 @@ import { Loader2, Plus, MessageCircle, Pencil, Trash, LogOut } from "lucide-reac
 import axios from 'axios';
 import useTenantListData from '@/hooks/useTenantListData';
 import { useNavigate } from 'react-router-dom';
+import { getCurrentUser } from '@/api/authApi';
+import { addTenant, deleteTenant, editTenant, sendAlert } from '@/api/tenantApi';
 
 const Home = () => {  
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -16,11 +18,9 @@ const Home = () => {
   const [selectedUser, setSelectedUser] = useState(null);
   const [loading, setLoading] = useState(false);
   const [pageLoading, setPageLoading] = useState(true);
-  const [logoutLoading, setLogoutLoading] = useState(false);
   const [notification, setNotification] = useState({ show: false, type: '', message: '' });
   const [formData, setFormData] = useState({ name: '', address: '', mobile: '' });
   const { users, setUsers } = useTenantListData();
-  // const [users, setUsers] = useState(useTenantListData());
   const [deletingIds, setDeletingIds] = useState(new Set());
   const [alertingIds, setAlertingIds] = useState(new Set());
   const navigate = useNavigate();
@@ -31,33 +31,11 @@ const Home = () => {
 
   const checkAuthStatus = async () => {
     try {
-      await axios.get(
-        `${import.meta.env.VITE_DOMAIN}/api/v1/tenant/current-user`,
-        {
-          withCredentials: true,
-        }
-      );
+      await getCurrentUser();
     } catch (err) {
       navigate('/login');
     } finally {
       setPageLoading(false);
-    }
-  };
-
-  const handleLogout = async () => {
-    setLogoutLoading(true);
-    try {
-      await axios.get(
-        `${import.meta.env.VITE_DOMAIN}/api/v1/tenant/logout`, 
-        {
-          withCredentials: true
-        }
-      );
-      navigate('/login');
-    } catch (error) {
-      showNotification('error', 'Failed to logout');
-    } finally {
-      setLogoutLoading(false);
     }
   };
 
@@ -75,7 +53,7 @@ const Home = () => {
   const handleSubmitEdit = async () => {
     setLoading(true);
     try {
-      await axios.put(`${import.meta.env.VITE_DOMAIN}/api/v1/tenant/edit-tenants`, {...formData, id: selectedUser._id});
+      await editTenant({...formData, id: selectedUser._id});
       setUsers(users.map(user => 
         user._id === selectedUser._id ? { ...user, ...formData } : user
       ));
@@ -90,7 +68,7 @@ const Home = () => {
   const handleSubmitAdd = async () => {
     setLoading(true);
     try {
-      const response = await axios.post(`${import.meta.env.VITE_DOMAIN}/api/v1/tenant/add-tenant`, formData);
+      const response = await addTenant(formData);
       setUsers([...users, response.data?.data]);
       showNotification('success', 'User added successfully!');
       setIsAddDialogOpen(false);
@@ -103,7 +81,7 @@ const Home = () => {
   const handleDelete = async (userId) => {
     setDeletingIds(prev => new Set([...prev, userId]));
     try {
-      await axios.post(`${import.meta.env.VITE_DOMAIN}/api/v1/tenant/delete-tenants`, {id: userId});
+      await deleteTenant({id: userId});
       setUsers(users.filter(user => user._id !== userId));
       showNotification('success', 'User deleted successfully!');
     } catch (error) {
@@ -120,7 +98,7 @@ const Home = () => {
   const handleAlert = async (userId, mobile) => {
     setAlertingIds(prev => new Set([...prev, userId]));
     try {
-      await axios.post(`${import.meta.env.VITE_DOMAIN}/api/v1/tenant/send-alert`, {mobile});
+      await sendAlert({mobile});
       showNotification('success', 'Alert sent successfully!');
     } catch (error) {
       showNotification('error', 'Failed to send alert');
@@ -151,25 +129,6 @@ const Home = () => {
 
   return (
     <div className="container mx-auto p-4">
-      <div className="flex justify-end mb-6">
-        <Button 
-          variant="outline" 
-          onClick={handleLogout}
-          disabled={logoutLoading}
-        >
-          {logoutLoading ? (
-            <>
-              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-              Logging out...
-            </>
-          ) : (
-            <>
-              <LogOut className="w-4 h-4 mr-2" />
-              Logout
-            </>
-          )}
-        </Button>
-      </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {users.map((user) => (
           <Card key={user._id} className="relative">
