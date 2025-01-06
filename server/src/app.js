@@ -1,8 +1,15 @@
 import express from "express";
 import cors from 'cors';
 import cookieParser from "cookie-parser";
+import {fileURLToPath} from "url";
+import { dirname } from "path";
+import path from "path";
 
 const app = express();
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+const staticPath = path.join(__dirname, '../public');
 
 // this use for cross origin sharing 
 app.use(cors({ origin: [process.env.CORS_ORIGIN, "http://localhost:5173", "https://rentalert.iotsense.in"], credentials: true }));
@@ -10,6 +17,7 @@ app.use(cors({ origin: [process.env.CORS_ORIGIN, "http://localhost:5173", "https
 app.use(express.json());
 // this is used for parsing url data extended is used for nessted object
 app.use(express.urlencoded({ extended: true }));
+app.use(express.static(staticPath));
 // this is used to parse the cookie
 app.use(cookieParser());
 

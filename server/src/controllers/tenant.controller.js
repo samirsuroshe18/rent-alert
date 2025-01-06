@@ -6,6 +6,7 @@ import mongoose from 'mongoose';
 import axios from 'axios';
 import { User } from '../models/user.model.js';
 import jwt from 'jsonwebtoken';
+import { deleteCloudinary, uploadOnCloudinary } from '../utils/cloudinary.js';
 
 const generateAccessAndRefreshToken = async (userId) => {
     try {
@@ -23,28 +24,6 @@ const generateAccessAndRefreshToken = async (userId) => {
         throw new ApiError(500, "Something wwnt wrong while generating refresh and access token");
     }
 }
-
-const verifyJwtForLimitFlow = asyncHandler(async (req, _, next) => {
-    try {
-        const token = req.cookies?.accessToken || req.header("Authorization")?.replace("Bearer ", "");
-
-        if (!token) {
-            throw new ApiError(401, "Unauthorised request");
-        }
-
-        const decodedToken = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
-        const user = await User.findById(decodedToken?._id).select("-password -refreshToken -__v");
-
-        if (!user) {
-            throw new ApiError(401, "Invalid access token");
-        }
-
-        req.user = user;
-        next();
-    } catch (error) {
-        throw new ApiError(401, error?.message || "Invalid access token");
-    }
-})
 
 const loginUser = asyncHandler(async (req, res) => {
     const { email, password } = req.body;
@@ -102,14 +81,31 @@ const logoutUser = asyncHandler(async (req, res) => {
 const addTenant = asyncHandler(async (req, res) => {
     const { name, mobile, address } = req.body;
 
-    if(!name?.trim() || !mobile?.trim() || !address?.trim()){
+    // Handle optional file upload
+    let profileUrl = null;
+
+    if (req.file) {
+        const file = req.file.path;
+        const path = await uploadOnCloudinary(file);
+
+        if (!path?.url) {
+            throw new ApiError(500, "Failed to upload company logo");
+        }
+
+        profileUrl = path.url;
+    }
+
+    // Validate required fields
+    if (!name?.trim() || !mobile?.trim() || !address?.trim()) {
         throw new ApiError(400, "All fields are required");
     }
 
+    // Create tenant
     const user = await Tenant.create({
         name,
         mobile,
         address,
+        profile: profileUrl, // Optional profile URL
     });
 
     const createdTenant = await Tenant.findById(user._id);
@@ -136,8 +132,12 @@ const getTenants = asyncHandler(async (req, res) => {
 });
 
 const editTenant = asyncHandler(async (req, res) => {
+    console.log("hello");
     const { name, mobile, address, id } = req.body;
     const tenantId = mongoose.Types.ObjectId.createFromHexString(id);
+
+    // Handle optional file upload
+    let profileUrl = null;
 
     if(!name?.trim() || !mobile?.trim() || !address?.trim()){
         throw new ApiError(400, "All fields are required");
@@ -149,9 +149,25 @@ const editTenant = asyncHandler(async (req, res) => {
         throw new ApiError(404, "Tenant not found");
     }
 
+    if(tenant.profile){
+        await deleteCloudinary(tenant.profile);
+    }
+
+    if (req.file) {
+        const file = req.file.path;
+        const path = await uploadOnCloudinary(file);
+
+        if (!path?.url) {
+            throw new ApiError(500, "Failed to upload company logo");
+        }
+
+        profileUrl = path.url;
+    }
+
     tenant.name = name;
     tenant.mobile = mobile;
     tenant.address = address;
+    tenant.profile = profileUrl;
 
     const updatedTenant = await tenant.save();
 

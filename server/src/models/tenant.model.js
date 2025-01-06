@@ -19,6 +19,11 @@ const tenantSchema = new Schema({
         trim: true,
     },
 
+    profile: {
+        type: String,
+        trim: true,
+    },
+
 }, { timestamps: true });
 
 export const Tenant = mongoose.model("Tenant", tenantSchema);
